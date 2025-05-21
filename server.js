@@ -18,13 +18,18 @@ io.on("connection", (socket) => {
     io.emit("user-list-update", users);
   });
 
-  socket.on("message", (data) => {
+  socket.on("message", ({ mess, toId }) => {
     const msg = {
       username: users[socket.id],
-      text: data,
+      text: mess,
       time: Date.now(),
     };
-    io.emit("message", msg);
+
+    if (toId !== "-1") {
+      io.to(toId).except(socket.id).emit("message", msg);
+    } else {
+      io.emit("message", msg);
+    }
   });
 
   socket.on("typing", () => {
@@ -39,7 +44,6 @@ io.on("connection", (socket) => {
     if (users[socket.id]) {
       socket.broadcast.emit("user left", users[socket.id]);
       delete users[socket.id];
-      console.log(users);
       io.emit("user-list-update", users);
     }
   });

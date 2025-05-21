@@ -7,7 +7,7 @@
   </head>
 
   <body>
-    <h1>Socket Chat app +18</h1>
+    <h1>Socket Chat app</h1>
     <ul id="messages"></ul>
     <p id="typing-indicator"></p>
     <form id="form">
@@ -81,10 +81,11 @@
 
       form.addEventListener("submit", (e) => {
         e.preventDefault();
-        socket.emit("message", input.value);
-        console.log(userSelection.value);
-        // Stuur id mee naar server om berichten te verzenden naar een specifieke gebruiker
-        // Wanneer id -1 is, verzend berichten naar alle gebruikers
+        socket.emit("message", {
+          mess: input.value,
+          toId: userSelection.value,
+        });
+
         input.value = "";
       });
     </script>
