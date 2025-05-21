@@ -57,7 +57,9 @@
 
       socket.on("message", (msg) => {
         const li = document.createElement("li");
-        li.textContent = `${msg.username}: ${msg.text}`;
+        li.textContent = `${msg.username}: ${msg.private ? "(private)" : ""} ${
+          msg.text
+        }`;
         messages.appendChild(li);
       });
 

@@ -24,9 +24,10 @@ io.on("connection", (socket) => {
       text: mess,
       time: Date.now(),
     };
-    // Private toevoegen
     if (toId !== "-1") {
-      io.to(toId).except(socket.id).emit("message", msg);
+      io.to(toId)
+        .except(socket.id)
+        .emit("message", { ...msg, private: true });
       io.to(socket.id).emit("message", msg);
     } else {
       io.emit("message", msg);
