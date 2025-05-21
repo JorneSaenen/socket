@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatie chat</title>
+  </head>
+
+  <body>
+    <h1>Socket Chat app +18</h1>
+    <ul id="messages"></ul>
+    <p id="typing-indicator"></p>
+    <form id="form">
+      <select name="users" id="users"></select>
+      <input type="text" id="input" />
+      <button type="submit">Send</button>
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const form = document.getElementById("form");
+      const input = document.getElementById("input");
+      const messages = document.getElementById("messages");
+      const typingIndicator = document.getElementById("typing-indicator");
+      const userSelection = document.getElementById("users");
+
+      let timeout = null;
+      let name = null;
+      while (!name) {
+        name = prompt("Enter your name: ");
+      }
+
+      socket.emit("join", name);
+      socket.on("user joined", (username) => {
+        alert(`${username} joined`);
+      });
+
+      input.addEventListener("keydown", () => {
+        socket.emit("typing");
+        clearTimeout(timeout);
+      });
+
+      input.addEventListener("keyup", () => {
+        timeout && clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          socket.emit("stop typing");
+        }, 1000);
+      });
+
+      socket.on("typing", (user) => {
+        typingIndicator.textContent = `${user} is aan het typen...`;
+      });
+
+      socket.on("stop typing", () => {
+        typingIndicator.textContent = "";
+      });
+
+      socket.on("message", (msg) => {
+        const li = document.createElement("li");
+        li.textContent = `${msg.username}: ${msg.text}`;
+        messages.appendChild(li);
+      });
+
+      socket.on("user left", (user) => {
+        alert(`${user} heeft de chat verlaten.`);
+      });
+
+      socket.on("user-list-update", (users) => {
+        userSelection.innerHTML = "";
+        Object.entries(users).forEach(([id, name]) => {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = name;
+          userSelection.appendChild(option);
+        });
+        const option = document.createElement("option");
+        option.value = -1;
+        option.textContent = "All users";
+        userSelection.appendChild(option);
+      });
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        socket.emit("message", input.value);
+        console.log(userSelection.value);
+        // Stuur id mee naar server om berichten te verzenden naar een specifieke gebruiker
+        // Wanneer id -1 is, verzend berichten naar alle gebruikers
+        input.value = "";
+      });
+    </script>
+  </body>
+</html>
